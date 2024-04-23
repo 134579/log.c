@@ -20,7 +20,9 @@
  * IN THE SOFTWARE.
  */
 
+#define _GNU_SOURCE
 #include "log.h"
+#include <unistd.h>
 
 #define MAX_CALLBACKS 32
 
@@ -55,13 +57,13 @@ static void stdout_callback(log_Event *ev) {
   buf[strftime(buf, sizeof(buf), "%H:%M:%S", ev->time)] = '\0';
 #ifdef LOG_USE_COLOR
   fprintf(
-    ev->udata, "%s %s%-5s\x1b[0m \x1b[90m%s:%d:\x1b[0m ",
-    buf, level_colors[ev->level], level_strings[ev->level],
+    ev->udata, "%s %s%-5s\x1b[0m [%d.%d] \x1b[90m%s:%d:\x1b[0m ",
+    buf, level_colors[ev->level], level_strings[ev->level], ev->pid, ev->tid,
     ev->file, ev->line);
 #else
   fprintf(
-    ev->udata, "%s %-5s %s:%d: ",
-    buf, level_strings[ev->level], ev->file, ev->line);
+    ev->udata, "%s %-5s [%d.%d] %s:%d: ",
+    buf, level_strings[ev->level], ev->pid, ev->tid, ev->file, ev->line);
 #endif
   vfprintf(ev->udata, ev->fmt, ev->ap);
   fprintf(ev->udata, "\n");
@@ -143,6 +145,10 @@ void log_log(int level, const char *file, int line, const char *fmt, ...) {
     .file  = file,
     .line  = line,
     .level = level,
+    .pid = getpid(),
+    .ppid = getppid(),
+    .ptid = pthread_self(),
+    .tid = gettid()
   };
 
   lock();

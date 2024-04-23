@@ -12,8 +12,13 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <time.h>
+#include <pthread.h>
 
 #define LOG_VERSION "0.1.0"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct {
   va_list ap;
@@ -23,6 +28,11 @@ typedef struct {
   void *udata;
   int line;
   int level;
+  const char *func;
+  pid_t pid;
+  pid_t ppid;
+  pthread_t ptid;
+  pid_t tid;
 } log_Event;
 
 typedef void (*log_LogFn)(log_Event *ev);
@@ -46,4 +56,10 @@ int log_add_fp(FILE *fp, int level);
 
 void log_log(int level, const char *file, int line, const char *fmt, ...);
 
+#ifdef __cplusplus
+}
 #endif
+
+
+#endif
+
