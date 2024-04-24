@@ -32,7 +32,7 @@ void *DoLog(void *arg) {
 
 #define N 3
 int main(int argc, const char **argv) {
-
+  log_info("Main Thread");
   pthread_t threads[N];
 
   pthread_mutex_init(&MUTEX_LOG, NULL);
@@ -45,7 +45,6 @@ int main(int argc, const char **argv) {
   for (size_t i = 0; i < N; i++) {
     pthread_join(threads[i], NULL);
   }
-
 
   return 0;
 }
